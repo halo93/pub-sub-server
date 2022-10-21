@@ -19,7 +19,7 @@ public class DataProcessingService {
     private final DataRepository dataRepository;
     private static final String PIVOT_RECORD_KEY = PubSubUtil.generateRedisKeyWithoutId(RedisKeyType.PIVOT.toString());
     private static final String USER_RECORD_KEY = PubSubUtil.generateRedisKeyWithoutId(RedisKeyType.USER.toString());
-    private static final double COSINE_SIMILARITY_THRESHOLD = 0.5;
+    private static final double COSINE_SIMILARITY_THRESHOLD = 0.3;
 
     public Data saveChunk(List<Integer> chunk) {
         if (!dataRepository.existsByKey(PIVOT_RECORD_KEY)) {
