@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.util.List;
 
 @RestController
@@ -18,12 +19,11 @@ public class DataProcessingController {
     private final DataProcessingService dataProcessingService;
 
     @PostMapping("/pub")
-    public ResponseEntity<String> createNewMessage(@RequestBody List<Integer> chunk) {
-        dataProcessingService.saveChunk(chunk);
-        return ResponseEntity.ok("Success");
+    public ResponseEntity<Instant> createNewMessage(@RequestBody List<Integer> chunk) {
+        return ResponseEntity.ok(dataProcessingService.saveChunk(chunk).getCreatedAt());
     }
 
-    @PostMapping("/remove")
+    @DeleteMapping("/remove")
     public ResponseEntity<String> removeAllData() {
         dataProcessingService.deleteAllData();
         return ResponseEntity.ok("Success");

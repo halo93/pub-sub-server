@@ -6,6 +6,7 @@ import lombok.Getter;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.index.Indexed;
 
+import java.time.Instant;
 import java.util.List;
 
 @AllArgsConstructor
@@ -19,4 +20,6 @@ public class Data {
     @Indexed
     private String key;
     private List<Integer> chunk;
+
+    private Instant createdAt;
 }

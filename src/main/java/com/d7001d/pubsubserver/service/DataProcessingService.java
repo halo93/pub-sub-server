@@ -8,6 +8,7 @@ import com.d7001d.pubsubserver.repository.DataRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -20,19 +21,21 @@ public class DataProcessingService {
     private static final String USER_RECORD_KEY = PubSubUtil.generateRedisKeyWithoutId(RedisKeyType.USER.toString());
     private static final double COSINE_SIMILARITY_THRESHOLD = 0.5;
 
-    public void saveChunk(List<Integer> chunk) {
+    public Data saveChunk(List<Integer> chunk) {
         if (!dataRepository.existsByKey(PIVOT_RECORD_KEY)) {
-            saveBrandNewChunk(chunk);
+            return saveBrandNewChunk(chunk);
         } else {
             Map.Entry<String, Double> maxCosineSimilarityEntry = findMaxCosineSimilarityWithPivotData(chunk);
             if (maxCosineSimilarityEntry.getValue() < COSINE_SIMILARITY_THRESHOLD) {
-                saveBrandNewChunk(chunk);
+                return saveBrandNewChunk(chunk);
             } else {
-                Data userData = Data.builder().key(maxCosineSimilarityEntry.getKey()).chunk(chunk).build();
+                Data userData = Data.builder().key(maxCosineSimilarityEntry.getKey())
+                        .chunk(chunk).createdAt(Instant.now()).build();
                 Data savedUserData = dataRepository.save(userData);
                 if (Objects.isNull(savedUserData.getId())) {
                     throw new InternalServerErrorException();
                 }
+                return savedUserData;
             }
 
         }
@@ -48,15 +51,16 @@ public class DataProcessingService {
                 .max(Map.Entry.comparingByValue()).get();
     }
 
-    private void saveBrandNewChunk(List<Integer> chunk) {
-        Data pivotData = Data.builder().key(PIVOT_RECORD_KEY).chunk(chunk).build();
+    private Data saveBrandNewChunk(List<Integer> chunk) {
+        Data pivotData = Data.builder().key(PIVOT_RECORD_KEY).chunk(chunk).createdAt(Instant.now()).build();
         Data savedPivotdata = dataRepository.save(pivotData);
         String uniqueUserRecordKey = USER_RECORD_KEY + chunk.stream().map(String::valueOf).collect(Collectors.joining());
-        Data userData = Data.builder().key(uniqueUserRecordKey).chunk(chunk).build();
+        Data userData = Data.builder().key(uniqueUserRecordKey).chunk(chunk).createdAt(Instant.now()).build();
         Data savedUserData = dataRepository.save(userData);
         if (Objects.isNull(savedPivotdata.getId()) || Objects.isNull(savedUserData.getId())) {
             throw new InternalServerErrorException();
         }
+        return savedUserData;
     }
 
     public List<Data> findAllPivotDataByKey() {
