@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: simple-pub-sub-service
+  redis:
+    ssl: true
+    url: rediss://default:AVNS_24M3sltE7IfXCtjWfHL@redis-pub-sub-nordddvpnnn-922e.aivencloud.com:21502
